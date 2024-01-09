@@ -1,3 +1,7 @@
+import CreatePost from "@/components/home/CreatePost";
+import Posts from "@/components/home/Posts";
+import Reccomend from "@/components/home/Reccomend";
+import Trends from "@/components/home/Trends";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
@@ -18,27 +22,15 @@ export default function Home() {
   const isSupabaseConnected = canInitSupabaseClient();
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-20 items-center">
-      <div className="animate-in flex-1 flex flex-col gap-20 opacity-0 max-w-4xl px-3">
-        <main className="flex-1 flex flex-col gap-6">
-          <h2 className="font-bold text-4xl mb-4">Next steps</h2>
-          {isSupabaseConnected ? <p>Hello</p> : <p>Signin</p>}
-        </main>
+    <div className="flex-1 w-full flex gap-4">
+      <div className="flex-[0.7] space-y-6">
+        <CreatePost />
+        <Posts />
       </div>
-
-      <footer className="w-full border-t border-t-foreground/10 p-8 flex justify-center text-center text-xs">
-        <p>
-          Powered by{" "}
-          <a
-            href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-            target="_blank"
-            className="font-bold hover:underline"
-            rel="noreferrer"
-          >
-            Supabase
-          </a>
-        </p>
-      </footer>
+      <div className="flex-[0.3] space-y-6">
+        <Trends />
+        <Reccomend />
+      </div>
     </div>
   );
 }

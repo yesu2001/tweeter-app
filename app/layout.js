@@ -14,9 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="bg-[#F2F2F2]">
         <Header />
-        <main className="min-h-screen flex flex-col items-center">
-          {children}
-        </main>
+        <main className="h-full flex mx-5 md:mx-[12rem] my-6">{children}</main>
       </body>
     </html>
   );

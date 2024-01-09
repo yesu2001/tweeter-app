@@ -40,7 +40,7 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between px-4 md:px-8 bg-white">
+    <div className="flex justify-between px-4 md:px-16 bg-white">
       <div className="py-3 flex items-center">
         <Image
           src={desktopLogo}
