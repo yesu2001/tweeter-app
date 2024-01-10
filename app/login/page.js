@@ -2,8 +2,11 @@ import Link from "next/link";
 import { headers, cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getUserFromDB } from "@/utils/dbcalls/profileApi";
 
 export default function Login({ searchParams }) {
+  const isCheckEmail =
+    searchParams.message === "Check email to continue sign in process";
   const signIn = async (formData) => {
     "use server";
 
@@ -11,7 +14,6 @@ export default function Login({ searchParams }) {
     const password = formData.get("password");
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -21,7 +23,14 @@ export default function Login({ searchParams }) {
       return redirect("/login?message=Could not authenticate user");
     }
 
-    return redirect("/");
+    const { data: user } = await supabase.auth.getUser();
+    console.log(user);
+    const userData = await getUserFromDB(user);
+    console.log(userData);
+
+    if (userData) {
+      return redirect("/");
+    }
   };
 
   const signUp = async (formData) => {
@@ -49,8 +58,8 @@ export default function Login({ searchParams }) {
   };
 
   return (
-    <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
-      <Link
+    <div className="flex flex-col items-center w-full px-8 sm:max-w-md my-32 mx-auto justify-center gap-2 ">
+      {/* <Link
         href="/"
         className="absolute left-8 top-8 py-2 px-4 rounded-md no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm"
       >
@@ -69,17 +78,17 @@ export default function Login({ searchParams }) {
           <polyline points="15 18 9 12 15 6" />
         </svg>{" "}
         Back
-      </Link>
+      </Link> */}
 
       <form
-        className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
+        className="animate-in flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white p-6 rounded-lg"
         action={signIn}
       >
         <label className="text-md" htmlFor="email">
           Email
         </label>
         <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          className="rounded-md px-4 py-2 bg-inherit border border-blue-400 mb-6 outline-none"
           name="email"
           placeholder="you@example.com"
           required
@@ -88,23 +97,27 @@ export default function Login({ searchParams }) {
           Password
         </label>
         <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          className="rounded-md px-4 py-2 bg-inherit border border-blue-400 mb-6 outline-none"
           type="password"
           name="password"
           placeholder="••••••••"
           required
         />
-        <button className="bg-green-700 rounded-md px-4 py-2 text-foreground mb-2">
+        <button className="bg-[#2F80ED] text-white rounded-md px-4 py-2 text-foreground mb-2 font-semibold">
           Sign In
         </button>
         <button
           formAction={signUp}
-          className="border border-foreground/20 rounded-md px-4 py-2 text-foreground mb-2"
+          className="border-2 border-[#2F80ED] text-[#2F80ED] font-bold rounded-md px-4 py-2 text-foreground mb-2"
         >
           Sign Up
         </button>
         {searchParams?.message && (
-          <p className="mt-4 p-4 bg-foreground/10 text-foreground text-center">
+          <p
+            className={`mt-4 p-2 bg-accent rounded-md ${
+              isCheckEmail ? "text-green-700" : "text-red-700"
+            } font-semibold text-center`}
+          >
             {searchParams.message}
           </p>
         )}

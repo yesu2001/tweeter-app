@@ -3,19 +3,34 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useDispatch, useSelector } from "react-redux";
 import { IoMdArrowDropdown, IoMdArrowDropup, IoMdClose } from "react-icons/io";
 import { RiAccountCircleFill, RiLogoutBoxRFill } from "react-icons/ri";
 import desktopLogo from "./assets/tweeter.svg";
 import mobileLogo from "./assets/tweeter-small.svg";
 import profilePic from "./assets/pic.avif";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Header() {
   const path = usePathname();
-  const isAuthenticated = true;
+  const dispatch = useDispatch();
+  async function checkuser() {
+    const supabase = createClient();
+    const { data: user } = await supabase.auth.getUser();
+    console.log(user);
+  }
+
+  useEffect(() => {
+    checkuser();
+  }, []);
+
+  const isAuthenticated = false;
   const [openDropdown, setOpenDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {}, []);
 
   const openDrawer = () => {
     setIsDrawerOpen(true);
@@ -40,7 +55,11 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between px-4 md:px-16 bg-white">
+    <div
+      className={` ${
+        path === "/login" ? "hidden" : "flex"
+      } justify-between px-4 md:px-16 bg-white `}
+    >
       <div className="py-3 flex items-center">
         <Image
           src={desktopLogo}
@@ -89,13 +108,13 @@ export default function Header() {
         ) : (
           <Link href={"/login"}>SignIn</Link>
         )}
-        {openDropdown && <DropDown />}
+        {openDropdown && <DropDown onClose={() => setOpenDropdown(false)} />}
       </div>
     </div>
   );
 }
 
-const DropDown = () => {
+const DropDown = ({ onClose }) => {
   return (
     <div
       className="absolute top-12 right-3 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 "
@@ -106,6 +125,7 @@ const DropDown = () => {
       <div className="py-1" role="none">
         <Link
           href="/profile"
+          onClick={onClose}
           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
         >
           <RiAccountCircleFill size={20} />
@@ -113,6 +133,9 @@ const DropDown = () => {
         </Link>
         <Link
           href="login"
+          onClick={() => {
+            onClose();
+          }}
           className="flex items-center gap-2 px-4 py-2 text-sm text-[#EB5757] hover:bg-gray-100"
         >
           <RiLogoutBoxRFill size={20} />

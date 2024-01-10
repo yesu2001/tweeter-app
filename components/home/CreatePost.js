@@ -19,7 +19,11 @@ export default function CreatePost() {
           width={50}
           className="rounded-md"
         />
-        <input type="text" placeholder="What's happening?" />
+        <input
+          type="text"
+          placeholder="What's happening?"
+          className="w-full outline-none p-1"
+        />
       </div>
       <div className="flex items-center justify-between">
         <div className="relative flex items-center gap-3 ml-14 text-[#2F80ED]">

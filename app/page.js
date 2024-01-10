@@ -5,21 +5,16 @@ import Trends from "@/components/home/Trends";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
-export default function Home() {
+export default async function Home() {
   const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
 
-  const canInitSupabaseClient = () => {
-    // This function is just for the interactive tutorial.
-    // Feel free to remove it once you have Supabase connected.
-    try {
-      createClient(cookieStore);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  };
+  const { data: session } = await supabase.auth.getSession();
 
-  const isSupabaseConnected = canInitSupabaseClient();
+  // console.log("session data", session?.session?.user);
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
     <div className="flex-1 w-full flex gap-4 mx-4 md:mx-60 my-6">
