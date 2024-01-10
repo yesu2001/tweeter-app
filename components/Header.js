@@ -104,22 +104,20 @@ const DropDown = () => {
       aria-labelledby="options-menu"
     >
       <div className="py-1" role="none">
-        <a
-          href="#"
+        <Link
+          href="/profile"
           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-          role="menuitem"
         >
           <RiAccountCircleFill size={20} />
           Profile
-        </a>
-        <a
-          href="#"
+        </Link>
+        <Link
+          href="login"
           className="flex items-center gap-2 px-4 py-2 text-sm text-[#EB5757] hover:bg-gray-100"
-          role="menuitem"
         >
           <RiLogoutBoxRFill size={20} />
           Logout
-        </a>
+        </Link>
       </div>
     </div>
   );

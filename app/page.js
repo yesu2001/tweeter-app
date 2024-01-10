@@ -22,12 +22,12 @@ export default function Home() {
   const isSupabaseConnected = canInitSupabaseClient();
 
   return (
-    <div className="flex-1 w-full flex gap-4">
+    <div className="flex-1 w-full flex gap-4 mx-4 md:mx-60 my-6">
       <div className="flex-[0.7] space-y-6">
         <CreatePost />
         <Posts />
       </div>
-      <div className="flex-[0.3] space-y-6">
+      <div className="hidden md:block flex-[0.3] space-y-6">
         <Trends />
         <Reccomend />
       </div>
