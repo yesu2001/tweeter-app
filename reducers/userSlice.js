@@ -18,14 +18,18 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 //   }
 // });
 
-export const fetchUser = createAsyncThunk("user/fetchUser", async () => {
-  try {
-    const data = fetchUserfromDB();
-    return data;
-  } catch (error) {
-    console.log("Could not fetch user", error);
+export const fetchUser = createAsyncThunk(
+  "user/fetchUser",
+  async ({ userId }) => {
+    try {
+      const data = fetchUserfromDB(userId);
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.log("Could not fetch user", error);
+    }
   }
-});
+);
 
 // export const updateUser = createAsyncThunk(
 //   "user/updateUser",

@@ -1,19 +1,37 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import Image from "next/image";
+import { useSelector } from "react-redux";
 import Filters from "../explore/Filters";
 import Posts from "../home/Posts";
 import ProfileInfo from "./ProfileInfo";
 import profileCover from "../assets/profilecover.jpg";
 import profilePic from "../assets/profile1.avif";
+import { fetchUserfromDB } from "@/utils/dbcalls/profileApi";
+import Loader from "../Loader";
+import defaultCover from "../assets/defaultCover.jpg";
 
 export default function Profile() {
   const filters = ["tweets", "tweets & replies", "media", "likes"];
+  const isLoading = useSelector((state) => state.user.isLoading);
+  const userInfo = useSelector((state) => state.user.userData);
+
+  console.log(userInfo);
+
+  if (isLoading) {
+    return (
+      <div className="w-full flex justify-center my-36">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full">
       {/* cover picture */}
       <div className="h-[200px] md:h-[300px] w-full">
         <Image
-          src={profileCover}
+          src={userInfo?.cover_pic || defaultCover}
           alt="profile cover"
           className="h-[100%] w-full object-cover"
         />

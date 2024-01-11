@@ -52,20 +52,12 @@ export async function checkAuthenticated() {
   }
 }
 
-// export async function getUser() {
-//   const cookieStore = cookies();
-//   const supabase = createClient(cookieStore);
-//   const { data: user } = await supabase.auth.getUser();
-//   return {
-//     userId: user.user.id,
-//     userEmail: user.user.email,
-//   };
-// }
-
-export const signOut = async () => {
-  "use server";
+export async function getUser() {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
-  await supabase.auth.signOut();
-  return redirect("/");
-};
+  const { data: user } = await supabase.auth.getUser();
+  return {
+    userId: user.user.id,
+    userEmail: user.user.email,
+  };
+}

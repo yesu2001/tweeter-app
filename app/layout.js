@@ -1,6 +1,4 @@
 "use client";
-import { Inter } from "next/font/google";
-import { Provider } from "react-redux";
 import "./globals.css";
 import Header from "@/components/Header";
 import StoreProvider from "@/reducers/StoreProvider";

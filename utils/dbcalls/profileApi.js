@@ -1,11 +1,30 @@
-import { cookies } from "next/headers";
-import { createClient } from "../supabase/server";
+import { createClient } from "../supabase/client";
 import { redirect } from "next/navigation";
 
-const cookieStore = cookies();
-const supabase = createClient(cookieStore);
+const supabase = createClient();
 
-export const fetchUserfromDB = () => {};
+export async function getClientUser() {
+  const { data: user } = await supabase.auth.getUser();
+  return {
+    userId: user.user.id,
+    userEmail: user.user.email,
+  };
+}
+
+export const fetchUserfromDB = async (userId) => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select()
+    .eq("id", userId);
+
+  console.log("user data", data);
+  console.log("user error", error);
+  if (error) {
+    console.log("user error", error);
+    return null;
+  }
+  return data[0];
+};
 
 export async function getUserFromDB(user) {
   const { data, error } = await supabase
@@ -40,7 +59,7 @@ export async function SaveUserToDB(user) {
     })
     .select();
   if (error) {
-    throw new Error(
+    throw Error(
       "Something went wrong or user already exists in the database",
       error
     );

@@ -6,31 +6,45 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { IoMdArrowDropdown, IoMdArrowDropup, IoMdClose } from "react-icons/io";
 import { RiAccountCircleFill, RiLogoutBoxRFill } from "react-icons/ri";
+import { FaUserEdit } from "react-icons/fa";
 import desktopLogo from "./assets/tweeter.svg";
 import mobileLogo from "./assets/tweeter-small.svg";
 import profilePic from "./assets/pic.avif";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import Loader from "./Loader";
+import defaultPic from "../components/assets/defaultPic.png";
+import { fetchUser } from "@/reducers/userSlice";
 
 export default function Header() {
   const path = usePathname();
   const dispatch = useDispatch();
+  const userInfo = useSelector((state) => state.user.userData);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(false);
   async function checkuser() {
+    setLoading(true);
     const supabase = createClient();
     const { data: user } = await supabase.auth.getUser();
-    console.log(user);
+    dispatch(fetchUser({ userId: user?.user?.id }));
+    setUserData(user);
+    setLoading(false);
   }
 
   useEffect(() => {
     checkuser();
-  }, []);
+  }, [dispatch]);
+
+  async function signout() {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    console.log(error);
+  }
 
   const isAuthenticated = false;
   const [openDropdown, setOpenDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  useEffect(() => {}, []);
 
   const openDrawer = () => {
     setIsDrawerOpen(true);
@@ -83,18 +97,21 @@ export default function Header() {
         />
       </div>
       <div className="hidden md:flex">
-        <NavLink isAuthenticated={isAuthenticated} />
+        <NavLink userData={userData} />
       </div>
-      <div className="relative py-3">
-        {isAuthenticated ? (
+      <div className="relative py-3 flex gap-2 items-center">
+        {loading && <Loader size="sm" />}
+        {userData ? (
           <div className="flex items-center gap-2">
             <Image
-              src={profilePic}
+              src={userInfo?.user_pic || defaultPic}
               alt="profile pic"
-              width={50}
+              width={40}
               className="rounded-xl"
             />
-            <p className="hidden md:block font-semibold">James</p>
+            <p className="hidden md:block font-semibold">
+              {userInfo?.user_name || userInfo?.user_email}
+            </p>
             {openDropdown ? (
               <button onClick={() => setOpenDropdown(false)}>
                 <IoMdArrowDropup size={25} />
@@ -108,13 +125,15 @@ export default function Header() {
         ) : (
           <Link href={"/login"}>SignIn</Link>
         )}
-        {openDropdown && <DropDown onClose={() => setOpenDropdown(false)} />}
+        {openDropdown && (
+          <DropDown onClose={() => setOpenDropdown(false)} signout={signout} />
+        )}
       </div>
     </div>
   );
 }
 
-const DropDown = ({ onClose }) => {
+const DropDown = ({ onClose, signout }) => {
   return (
     <div
       className="absolute top-12 right-3 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 "
@@ -132,9 +151,18 @@ const DropDown = ({ onClose }) => {
           Profile
         </Link>
         <Link
+          href="/profile/edit"
+          onClick={onClose}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+        >
+          <FaUserEdit size={20} />
+          Edit Profile
+        </Link>
+        <Link
           href="login"
           onClick={() => {
             onClose();
+            signout();
           }}
           className="flex items-center gap-2 px-4 py-2 text-sm text-[#EB5757] hover:bg-gray-100"
         >
@@ -146,7 +174,7 @@ const DropDown = ({ onClose }) => {
   );
 };
 
-const Drawer = ({ isOpen, onClose, isAuthenticated }) => {
+const Drawer = ({ isOpen, onClose, userData }) => {
   return (
     <div
       className={`fixed inset-0 overflow-hidden transition-transform ease-in-out duration-300 ${
@@ -178,7 +206,7 @@ const Drawer = ({ isOpen, onClose, isAuthenticated }) => {
               {/* Body */}
               <div className="flex-1 relative px-4 py-6">
                 {/* Add your drawer content here */}
-                <NavLink isAuthenticated={isAuthenticated} />
+                <NavLink userData={userData} />
               </div>
             </div>
           </div>
@@ -188,7 +216,7 @@ const Drawer = ({ isOpen, onClose, isAuthenticated }) => {
   );
 };
 
-const NavLink = ({ isAuthenticated }) => {
+const NavLink = ({ userData }) => {
   const path = usePathname();
   return (
     <div className="flex flex-col md:flex-row mt-4 gap-3 md:gap-16 text-[#828282]">
@@ -210,7 +238,7 @@ const NavLink = ({ isAuthenticated }) => {
       >
         Explore
       </Link>
-      {isAuthenticated && (
+      {userData && (
         <Link
           href={"/bookmarks"}
           className={`${
