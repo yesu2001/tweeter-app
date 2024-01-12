@@ -104,9 +104,10 @@ export default function Header() {
         {userData ? (
           <div className="flex items-center gap-2">
             <Image
-              src={userInfo?.user_pic || defaultPic}
+              src={defaultPic}
               alt="profile pic"
               width={40}
+              height={40}
               className="rounded-xl"
             />
             <p className="hidden md:block font-semibold">
