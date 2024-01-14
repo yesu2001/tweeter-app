@@ -7,7 +7,7 @@ import {
   FaRegBookmark,
 } from "react-icons/fa";
 
-export default function Post({ post }) {
+export default function Post({ post, userInfo }) {
   return (
     <div className="bg-white p-4 rounded-md">
       {/* header */}
@@ -20,19 +20,19 @@ export default function Post({ post }) {
           className="rounded-lg"
         />
         <div>
-          <p className="font-semibold">{post?.username}</p>
+          <p className="font-semibold">{post?.user_name}</p>
           <p className="text-[#BDBDBD] text-xs">{post?.created_at}</p>
         </div>
       </div>
       {/* post title */}
       <div className="my-4">
-        <p className="text-[#4F4F4F]">{post?.title}</p>
+        <p className="text-[#4F4F4F]">{post?.caption}</p>
       </div>
       {/* post image */}
       {post?.post_image && (
         <div className="h-[300px] w-full">
           <Image
-            src={post?.post_image}
+            src={post?.post_pic}
             alt="cover image"
             className="h-full w-full  object-cover"
           />
@@ -40,9 +40,9 @@ export default function Post({ post }) {
       )}
       {/* post status counts */}
       <div className="flex items-center justify-end gap-3 p-2 text-sm text-[#BDBDBD]">
-        <p>{post?.comment_counts} Comments</p>
-        <p>{post?.retweeted_counts} Retweets</p>
-        <p>{post?.saved_counts} Saved</p>
+        <p>{post?.comments_count} Comments</p>
+        <p>{post?.retweets_count} Retweets</p>
+        <p>{post?.saved_count} Saved</p>
       </div>
       {/* post icnos */}
       <div className="text-[#4F4F4F] p-2 flex items-center justify-around">
@@ -67,7 +67,7 @@ export default function Post({ post }) {
       <div className="p-2">
         <div className="flex items-center gap-2">
           <Image
-            src={post?.user_pic}
+            src={userInfo?.user_pic}
             alt="profile pic"
             width={40}
             height={40}

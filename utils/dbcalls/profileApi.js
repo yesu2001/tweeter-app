@@ -16,9 +16,6 @@ export const fetchUserfromDB = async (userId) => {
     .from("profiles")
     .select()
     .eq("id", userId);
-
-  console.log("user data", data);
-  console.log("user error", error);
   if (error) {
     console.log("user error", error);
     return null;
@@ -31,9 +28,6 @@ export async function getUserFromDB(user) {
     .from("profiles")
     .select()
     .eq("id", user.user.id);
-
-  console.log("user data", data);
-  console.log("user error", error);
   if (data.length === 0) {
     const userData = await SaveUserToDB(user);
     if (userData) {
@@ -66,4 +60,21 @@ export async function SaveUserToDB(user) {
   }
   console.log("done saving user to DB : ");
   return data[0];
+}
+
+export async function updateUserInDB(updates) {
+  try {
+    let { data, error } = await supabase
+      .from("profiles")
+      .upsert(updates)
+      .select();
+
+    if (error) {
+      console.log("error updating user", error);
+      throw Error("Error while updating the user:", error);
+    }
+    console.log("updated user data : ", data);
+  } catch (error) {
+    console.log("error updating user", error);
+  }
 }

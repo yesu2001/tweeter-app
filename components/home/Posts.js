@@ -5,11 +5,11 @@ import cover1 from "../assets/cover1.avif";
 import cover2 from "../assets/cover2.avif";
 import Post from "./Post";
 
-export default function Posts() {
+export default function Posts({ posts, userInfo }) {
   return (
     <div className="space-y-6">
-      {data.map((item) => (
-        <Post key={item.post_id} post={item} />
+      {posts.map((item) => (
+        <Post key={item.id} post={item} userInfo={userInfo} />
       ))}
     </div>
   );

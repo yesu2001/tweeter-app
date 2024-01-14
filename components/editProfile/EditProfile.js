@@ -6,8 +6,9 @@ import pic1 from "../assets/pic1.avif";
 import cover1 from "../assets/cover1.avif";
 import { createClient } from "@/utils/supabase/client";
 import Avatar from "./Avatar";
+import { fetchUser, updateUser } from "@/reducers/userSlice";
 
-export default function EditProfile() {
+export default function EditProfile({ user }) {
   const [activeStep, setActiveStep] = useState(1);
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.user.userData);
@@ -19,6 +20,22 @@ export default function EditProfile() {
     user_pic: userInfo?.user_pic || "",
     cover_pic: userInfo?.cover_pic || "",
   });
+
+  useEffect(() => {
+    dispatch(fetchUser({ userId: user?.id }));
+    if (userInfo) {
+      console.log(userInfo);
+      console.log(true);
+      setUserData((prevState) => ({
+        ...prevState,
+        username: userInfo?.user_name,
+        fullname: userInfo?.full_name,
+        bio: userInfo?.bio,
+        user_pic: userInfo?.user_pic,
+        cover_pic: userInfo?.cover_pic,
+      }));
+    }
+  }, [dispatch]);
 
   const handleChange = (e) => {
     setUserData((prevState) => ({
@@ -32,10 +49,6 @@ export default function EditProfile() {
   };
   const handlePrev = () => {
     setActiveStep(activeStep - 1);
-  };
-
-  const handleUpdateProfile = (e) => {
-    e.preventDefault();
   };
 
   const updateProfile = async (e) => {
@@ -52,17 +65,8 @@ export default function EditProfile() {
       full_name: userData.fullname,
     };
 
-    const supabase = createClient();
-    let { error } = await supabase.from("profiles").upsert(updates);
+    dispatch(updateUser({ userData: updates }));
 
-    if (error) {
-      alert(error.message);
-    } else {
-      setUserData((prevState) => ({
-        ...prevState,
-        user_pic: file,
-      }));
-    }
     setLoading(false);
   };
 
@@ -135,7 +139,6 @@ export default function EditProfile() {
 }
 
 const StepOne = ({ userData, handleChange }) => {
-  console.log(userData);
   return (
     <div>
       <p className="text-slate-500">Enter Your Basic Details</p>
@@ -170,11 +173,11 @@ const StepOne = ({ userData, handleChange }) => {
   );
 };
 
-const StepTwo = ({ userData, updateProfile, setUserData }) => {
-  const [images, setImages] = useState({
-    profilePic: pic1,
-    coverPic: cover1,
-  });
+const StepTwo = ({ userData, setUserData }) => {
+  // const [images, setImages] = useState({
+  //   profilePic: pic1,
+  //   coverPic: cover1,
+  // });
 
   return (
     <div className="mb-12">
@@ -183,89 +186,89 @@ const StepTwo = ({ userData, updateProfile, setUserData }) => {
       </p>
       <div className="my-3 space-y-4">
         <Avatar url={userData.user_pic} size={100} setUserData={setUserData} />
-        <div className="flex flex-col gap-2">
-          <UploadPicture
-            pic={images.profilePic}
-            name={"profilePic"}
-            setImages={setImages}
-          />
-        </div>
-        <div>
-          <UploadPicture
-            pic={images.coverPic}
-            name={"coverPic"}
-            setImages={setImages}
-          />
-        </div>
       </div>
     </div>
   );
 };
+// {/* <div className="flex flex-col gap-2">
+//   <UploadPicture
+//     pic={images.profilePic}
+//     name={"profilePic"}
+//     setImages={setImages}
+//   />
+// </div>
+// <div>
+//   <UploadPicture
+//     pic={images.coverPic}
+//     name={"coverPic"}
+//     setImages={setImages}
+//   />
+// </div> */}
 
-const UploadPicture = ({ pic, name, setImages }) => {
-  const [profileImage, setProfileImage] = useState(pic);
+// const UploadPicture = ({ pic, name, setImages }) => {
+//   const [profileImage, setProfileImage] = useState(pic);
 
-  async function storeIMageinDB(file) {
-    const supabase = createClient();
-    const filesample = file;
-    const fileExt = filesample.name.split(".").pop();
-    const filePath = `${Math.random()}.${fileExt}`;
+//   async function storeIMageinDB(file) {
+//     const supabase = createClient();
+//     const filesample = file;
+//     const fileExt = filesample.name.split(".").pop();
+//     const filePath = `${Math.random()}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file);
+//     const { data, error } = await supabase.storage
+//       .from("avatars")
+//       .upload(filePath, file);
 
-    console.log(error);
-    console.log(data);
-  }
+//     console.log(error);
+//     console.log(data);
+//   }
 
-  const handleImageChange = (event) => {
-    const selectedFile = event.target.files[0];
-    console.log(name);
-    storeIMageinDB(selectedFile);
-    const reader = new FileReader();
+//   const handleImageChange = (event) => {
+//     const selectedFile = event.target.files[0];
+//     console.log(name);
+//     storeIMageinDB(selectedFile);
+//     const reader = new FileReader();
 
-    console.log(event.target.name);
-    reader.onload = (e) => {
-      setProfileImage(e.target.result);
-      setImages((prevState) => ({
-        ...prevState,
-        [event.target.name]: e.target.result,
-      }));
-    };
+//     console.log(event.target.name);
+//     reader.onload = (e) => {
+//       setProfileImage(e.target.result);
+//       setImages((prevState) => ({
+//         ...prevState,
+//         [event.target.name]: e.target.result,
+//       }));
+//     };
 
-    reader.readAsDataURL(selectedFile);
-  };
+//     reader.readAsDataURL(selectedFile);
+//   };
 
-  return (
-    <div className="flex gap-4 relative m-3">
-      <div
-        className="cursor-pointer"
-        onClick={() => {
-          document.getElementById("profile-picture-input").click();
-        }}
-      >
-        <input
-          name={name === "profilePic" ? "coverPic" : "profilePic"}
-          type="file"
-          id="profile-picture-input"
-          accept="image/*"
-          onChange={handleImageChange}
-          style={{ display: "none" }}
-        />
-        <div className="rounded-xl h-full w-40 flex items-center justify-center p-2 border border-dashed border-slate-600">
-          <p className="text-slate-400 text-center">Upload {name} picture</p>
-        </div>
-      </div>
-      <Image
-        src={profileImage}
-        alt="Profile Picture"
-        width={name === "coverPic" ? 400 : 100}
-        height={name === "coverPic" ? 50 : 100}
-        className={`rounded-2xl ${
-          name === "coverPic" ? "h-[150px]" : "h-[100px]"
-        } object-center object-cover`}
-      />
-    </div>
-  );
-};
+//   return (
+//     <div className="flex gap-4 relative m-3">
+//       <div
+//         className="cursor-pointer"
+//         onClick={() => {
+//           document.getElementById("profile-picture-input").click();
+//         }}
+//       >
+//         <input
+//           name={name === "profilePic" ? "coverPic" : "profilePic"}
+//           type="file"
+//           id="profile-picture-input"
+//           accept="image/*"
+//           onChange={handleImageChange}
+//           style={{ display: "none" }}
+//         />
+//         <div className="rounded-xl h-full w-40 flex items-center justify-center p-2 border border-dashed border-slate-600">
+//           <p className="text-slate-400 text-center">Upload {name} picture</p>
+//         </div>
+//       </div>
+//       <Image
+//         src={profileImage}
+//         alt="Profile Picture"
+//         width={name === "coverPic" ? 400 : 100}
+//         height={name === "coverPic" ? 50 : 100}
+//         className={`rounded-2xl ${
+//           name === "coverPic" ? "h-[150px]" : "h-[100px]"
+//         } object-center object-cover`}
+//       />
+//     </div>
+//   );
+// };

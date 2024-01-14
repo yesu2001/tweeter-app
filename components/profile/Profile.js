@@ -10,13 +10,12 @@ import profilePic from "../assets/profile1.avif";
 import { fetchUserfromDB } from "@/utils/dbcalls/profileApi";
 import Loader from "../Loader";
 import defaultCover from "../assets/defaultCover.jpg";
+import { createClient } from "@/utils/supabase/client";
 
-export default function Profile() {
+export default function Profile({ user, isOwnProfile }) {
   const filters = ["tweets", "tweets & replies", "media", "likes"];
   const isLoading = useSelector((state) => state.user.isLoading);
   const userInfo = useSelector((state) => state.user.userData);
-
-  console.log(userInfo);
 
   if (isLoading) {
     return (
@@ -39,7 +38,7 @@ export default function Profile() {
 
       {/* profile info */}
       <div className="w-[80%] md:w-[60%] flex items-center justify-center mx-auto mt-[-50px]">
-        <ProfileInfo info={data} />
+        <ProfileInfo info={userInfo} isOwnProfile={isOwnProfile} />
       </div>
 
       {/* profile posts */}

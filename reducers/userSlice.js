@@ -1,4 +1,4 @@
-import { fetchUserfromDB } from "@/utils/dbcalls/profileApi";
+import { fetchUserfromDB, updateUserInDB } from "@/utils/dbcalls/profileApi";
 import { createClient } from "@/utils/supabase/client";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -22,8 +22,7 @@ export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async ({ userId }) => {
     try {
-      const data = fetchUserfromDB(userId);
-      console.log(data);
+      const data = await fetchUserfromDB(userId);
       return data;
     } catch (error) {
       console.log("Could not fetch user", error);
@@ -31,17 +30,18 @@ export const fetchUser = createAsyncThunk(
   }
 );
 
-// export const updateUser = createAsyncThunk(
-//   "user/updateUser",
-//   async ({ userData, userId }) => {
-//     try {
-//       const data = await updateUserInDB(userData, userId);
-//       return data;
-//     } catch (error) {
-//       console.log("Could not update user", error);
-//     }
-//   }
-// );
+export const updateUser = createAsyncThunk(
+  "user/updateUser",
+  async ({ userData }) => {
+    try {
+      await updateUserInDB(userData);
+      // console.log(data);
+      // return data;
+    } catch (error) {
+      console.log("Could not update user", error);
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -59,13 +59,25 @@ const userSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.userData = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "something went wrong when fetching user";
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // state.userData = action.payload;
+      })
+      .addCase(updateUser.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "Something went wrong when updating the user profile";
       });
     //     .addCase(saveUser.fulfilled, (state, action) => {
     //       state.userData = action.payload;
     //     })
-    //     .addCase(updateUser.fulfilled, (state, action) => {
-    //       state.userData = action.payload;
-    //     });
   },
 });
 
