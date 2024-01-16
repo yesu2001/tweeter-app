@@ -9,7 +9,9 @@ export default async function Login({ searchParams }) {
   const supabase = createClient(cookieStore);
   const { data: session } = await supabase.auth.getSession();
 
-  if (session) {
+  console.log(session);
+
+  if (session?.session) {
     redirect("/");
   }
   const isCheckEmail =
@@ -53,7 +55,7 @@ export default async function Login({ searchParams }) {
       email,
       password,
       options: {
-        emailRedirectTo: `${origin}/auth/callback`,
+        emailRedirectTo: `${origin}/login`,
       },
     });
 

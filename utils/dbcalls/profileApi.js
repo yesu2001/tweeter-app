@@ -28,6 +28,10 @@ export async function getUserFromDB(user) {
     .from("profiles")
     .select()
     .eq("id", user.user.id);
+  if (error) {
+    console.log("user error", error);
+    alert("user error", error);
+  }
   if (data.length === 0) {
     const userData = await SaveUserToDB(user);
     if (userData) {
@@ -53,10 +57,11 @@ export async function SaveUserToDB(user) {
     })
     .select();
   if (error) {
-    throw Error(
+    console.log(
       "Something went wrong or user already exists in the database",
       error
     );
+    return;
   }
   console.log("done saving user to DB : ");
   return data[0];
