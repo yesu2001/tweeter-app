@@ -2,9 +2,12 @@ import {
   addLikeToDB,
   createCommentToDB,
   createNewPost,
+  fetchBookmarksFromDB,
   fetchCommentsFromDB,
   fetchPostFromDB,
+  fetchUserPostFromDB,
   retweetPostToDB,
+  savePostToDB,
 } from "@/utils/dbcalls/postApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -38,6 +41,23 @@ export const fetchPosts = createAsyncThunk("post/fetchPosts", async () => {
     console.log("Error while Fetching Posts", error);
   }
 });
+
+// fetch user posts
+export const fetchUserPosts = createAsyncThunk(
+  "post/fetchUserPosts",
+  async (userId) => {
+    try {
+      const { data, error } = await fetchUserPostFromDB(userId);
+      if (error) {
+        console.log("Error while Fetching post", error);
+        throw new Error(error);
+      }
+      return data;
+    } catch (error) {
+      console.log("Error while Fetching Posts", error);
+    }
+  }
+);
 
 // create a new comment
 export const addComment = createAsyncThunk(
@@ -98,11 +118,50 @@ export const likePost = createAsyncThunk(
   }
 );
 
+// Save A Post
+export const savePost = createAsyncThunk(
+  "post/savePost",
+  async ({ saveRef, method }) => {
+    try {
+      console.log(saveRef, method);
+      const { data, error } = await savePostToDB(saveRef, method);
+      if (error) {
+        console.log("Error while Saving post", error);
+        throw new Error(error);
+      }
+      if (data.length > 0) {
+        return "Save Created";
+      }
+    } catch (error) {
+      console.log("Error while Saving Post", error);
+    }
+  }
+);
+
+export const fetchBookmarks = createAsyncThunk(
+  "post/fetchBookmarks",
+  async (userId) => {
+    try {
+      const { data, error } = await fetchBookmarksFromDB(userId);
+      if (error) {
+        console.log("Error while fetching bookmarks", error);
+        throw new Error(error);
+      }
+      console.log(data);
+      return data;
+    } catch (error) {
+      console.log("Error while fetching Bookmarks POsts", error);
+    }
+  }
+);
+
 const postSlice = createSlice({
   name: "posts",
   initialState: {
     isLoading: false,
     posts: [],
+    bookmarks: [],
+    userPosts: [],
     error: null,
     message: "",
   },
@@ -131,6 +190,17 @@ const postSlice = createSlice({
         state.isLoading = false;
         state.error = "Something Went Wrong When Fetching Post";
       })
+      .addCase(fetchUserPosts.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUserPosts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userPosts = action.payload;
+      })
+      .addCase(fetchUserPosts.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "Something Went Wrong When Fetching user Post";
+      })
       .addCase(addComment.pending, (state) => {
         state.isLoading = true;
       })
@@ -152,6 +222,28 @@ const postSlice = createSlice({
       .addCase(retweetPost.rejected, (state) => {
         state.isLoading = false;
         state.error = "Something Went Wrong When Retweeting";
+      })
+      .addCase(savePost.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(savePost.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.message = action.payload;
+      })
+      .addCase(savePost.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "Something Went Wrong When Saving to DB";
+      })
+      .addCase(fetchBookmarks.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchBookmarks.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.bookmarks = action.payload;
+      })
+      .addCase(fetchBookmarks.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "Something Went Wrong When Saving to DB";
       });
   },
 });

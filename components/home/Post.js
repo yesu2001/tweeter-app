@@ -11,10 +11,16 @@ import { IoClose, IoSend } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { parseAndFormatDate } from "@/utils/clientHelpers";
 import Loader from "../Loader";
-import { addComment, likePost, retweetPost } from "@/reducers/postSlice";
+import {
+  addComment,
+  likePost,
+  retweetPost,
+  savePost,
+} from "@/reducers/postSlice";
 import {
   checkLikedByUser,
   checkRetweetedByUser,
+  checkSavedByUser,
   fetchCommentsFromDB,
 } from "@/utils/dbcalls/postApi";
 
@@ -34,6 +40,8 @@ export default function Post({ post, userInfo }) {
       setRetweet(isRetweeted);
       const isLiked = await checkLikedByUser(post, userInfo);
       setLike(isLiked);
+      const isSaved = await checkSavedByUser(post, userInfo);
+      setSave(isSaved);
       const { data, error } = await fetchCommentsFromDB(post?.id);
       if (error) {
         console.log("Error while fetching comments", error);
@@ -87,7 +95,18 @@ export default function Post({ post, userInfo }) {
   };
 
   const handleSave = () => {
-    setSave(!save);
+    const saveRef = {
+      user_id: userInfo?.id,
+      post_id: post?.id,
+    };
+    if (!save) {
+      dispatch(savePost({ saveRef, method: "add" }));
+      setSave(true);
+    } else {
+      console.log("Save false");
+      dispatch(savePost({ saveRef, method: "delete" }));
+      setSave(false);
+    }
   };
 
   const handleAddComment = (e) => {

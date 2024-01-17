@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
 import Image from "next/image";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Filters from "../explore/Filters";
 import Posts from "../home/Posts";
 import ProfileInfo from "./ProfileInfo";
@@ -11,11 +11,18 @@ import { fetchUserfromDB } from "@/utils/dbcalls/profileApi";
 import Loader from "../Loader";
 import defaultCover from "../assets/defaultCover.jpg";
 import { createClient } from "@/utils/supabase/client";
+import { fetchPosts, fetchUserPosts } from "@/reducers/postSlice";
 
 export default function Profile({ user, isOwnProfile }) {
+  const dispatch = useDispatch();
   const filters = ["tweets", "tweets & replies", "media", "likes"];
   const isLoading = useSelector((state) => state.user.isLoading);
   const userInfo = useSelector((state) => state.user.userData);
+  const userPosts = useSelector((state) => state.posts.userPosts);
+
+  useEffect(() => {
+    dispatch(fetchUserPosts(user?.id));
+  }, [dispatch]);
 
   if (isLoading) {
     return (
@@ -47,7 +54,7 @@ export default function Profile({ user, isOwnProfile }) {
           <Filters filters={filters} defaultFilter={"tweets"} />
         </div>
         <div className="flex-[0.7] flex flex-col space-y-4">
-          <Posts />
+          <Posts posts={userPosts} userInfo={userInfo} />
         </div>
       </div>
     </div>

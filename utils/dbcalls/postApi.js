@@ -24,9 +24,36 @@ export async function createNewPost(post) {
   }
 }
 
+// fetch All posts
 export async function fetchPostFromDB() {
   try {
     const { data, error } = await supabase.from("posts").select();
+    if (error) {
+      console.log(error);
+      return {
+        data: null,
+        error: error,
+      };
+    }
+    return {
+      data,
+      errors: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: error,
+    };
+  }
+}
+
+// fetch user posts from DB
+export async function fetchUserPostFromDB(userId) {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select()
+      .eq("user_id", userId);
     if (error) {
       console.log(error);
       return {
@@ -275,7 +302,7 @@ export async function addLikeToDB(likeRef, method) {
         await addOrDelLikeToPost(data[0], method);
       }
       const { error: deleteError } = await supabase
-        .from("like")
+        .from("likes")
         .delete()
         .eq("like_id", data[0].like_id);
 
@@ -346,6 +373,108 @@ async function addOrDelLikeToPost(like, method) {
   }
 }
 
+export async function savePostToDB(saveRef, method) {
+  try {
+    if (method === "add") {
+      const { data, error } = await supabase
+        .from("saves")
+        .insert(saveRef)
+        .select();
+      if (error) {
+        return {
+          data: null,
+          error: error,
+        };
+      }
+      if (data) {
+        await addOrDelSavedPost(data[0], method);
+      }
+      return {
+        data,
+        errors: null,
+      };
+    } else {
+      const { data, error } = await supabase
+        .from("saves")
+        .select()
+        .eq("user_id", saveRef.user_id)
+        .eq("post_id", saveRef.post_id);
+      if (error) {
+        console.log(error);
+      }
+      if (data) {
+        await addOrDelSavedPost(data[0], method);
+      }
+      const { error: deleteError } = await supabase
+        .from("saves")
+        .delete()
+        .eq("saved_id", data[0].saved_id);
+
+      if (deleteError) {
+        console.log("Error while deleting tweet", deleteError);
+      }
+    }
+  } catch (error) {
+    return {
+      data: null,
+      error: error,
+    };
+  }
+}
+
+// Add or Delete a Saved post from DB
+export async function addOrDelSavedPost(saved, method) {
+  if (method === "delete") {
+    try {
+      const { data, error: errorOne } = await supabase
+        .from("posts")
+        .select()
+        .eq("id", saved?.post_id);
+
+      const savedArray = data[0];
+
+      const updatedSaves = savedArray?.saved_array?.filter(
+        (item) => item.saved_id !== saved?.saved_id
+      );
+      if (data.length > 0) {
+        const { error: errorTwo } = await supabase
+          .from("posts")
+          .update({ saved_array: updatedSaves })
+          .eq("id", saved?.post_id);
+        if (errorTwo) console.log(errorTwo);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  } else {
+    try {
+      const { data, error: errorOne } = await supabase
+        .from("posts")
+        .select()
+        .eq("id", saved?.post_id);
+
+      const savedArray = data[0];
+
+      const updatedSaves = savedArray?.saved_array
+        ? [
+            ...savedArray.saved_array,
+            { saved_id: saved?.saved_id, user_id: saved?.user_id },
+          ]
+        : [{ saved_id: saved?.saved_id, user_id: saved?.user_id }];
+
+      if (data.length > 0) {
+        const { error: errorTwo } = await supabase
+          .from("posts")
+          .update({ saved_array: updatedSaves })
+          .eq("id", saved?.post_id);
+        if (errorTwo) console.log(errorTwo);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 // check post is retweeted by user or not
 export async function checkRetweetedByUser(post, userInfo) {
   const { data, error } = await supabase
@@ -353,7 +482,6 @@ export async function checkRetweetedByUser(post, userInfo) {
     .select()
     .eq("user_id", userInfo?.id)
     .eq("post_id", post?.id);
-  console.log("retweet data", data);
 
   if (error) {
     console.log("retweet error", error);
@@ -366,12 +494,9 @@ export async function checkRetweetedByUser(post, userInfo) {
       ? item
       : null
   );
-  console.log(userRetweetPost);
   if (userRetweetPost?.length > 0) {
-    console.log("Has Retweeted for id: true", userRetweetPost);
     return true;
   }
-  console.log("false");
   return false;
 }
 
@@ -387,8 +512,6 @@ export async function checkLikedByUser(post, userInfo) {
     console.log("like error", error);
     return;
   }
-  console.log("like data", data);
-
   const likeData = data[0];
 
   const userLikedPost = post?.likes_array?.map((item) =>
@@ -396,14 +519,74 @@ export async function checkLikedByUser(post, userInfo) {
       ? item
       : null
   );
-  console.log(userLikedPost);
   if (userLikedPost?.length > 0) {
-    console.log("Has Retweeted for id: true", userLikedPost);
     return true;
   }
-  console.log("false");
   return false;
 }
 
 // check post is saved by user or not
-async function checkSavedByUser(post, userInfo) {}
+export async function checkSavedByUser(post, userInfo) {
+  const { data, error } = await supabase
+    .from("saves")
+    .select()
+    .eq("user_id", userInfo?.id)
+    .eq("post_id", post?.id);
+
+  if (error) {
+    console.log("Saved error", error);
+    return;
+  }
+
+  const savedData = data[0];
+
+  const userSavedPost = post?.saved_array?.map((item) =>
+    item.user_id === savedData?.user_id && item.saved_id === savedData?.saved_id
+      ? item
+      : null
+  );
+  if (userSavedPost?.length > 0) {
+    return true;
+  }
+  return false;
+}
+
+export async function fetchBookmarksFromDB(userId) {
+  try {
+    const { data: savesData, error: savesError } = await supabase
+      .from("saves")
+      .select("post_id")
+      .eq("user_id", userId);
+    if (savesError) {
+      return {
+        data: null,
+        error: savesError,
+      };
+    }
+    console.log(savesData);
+    const postsPromises = savesData.map(async (item) => {
+      const { data, error } = await supabase
+        .from("posts")
+        .select()
+        .eq("id", item.post_id);
+
+      if (error) {
+        console.error(`Error fetching post ${item.post_id}:`, error); // Log error with context
+        return null; // Return null to handle errors gracefully
+      }
+
+      return data[0];
+    });
+
+    const bookMarkedPosts = await Promise.all(postsPromises);
+    return {
+      data: bookMarkedPosts.filter(Boolean),
+      errors: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: error,
+    };
+  }
+}

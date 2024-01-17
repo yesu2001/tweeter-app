@@ -5,18 +5,20 @@ import Filters from "../explore/Filters";
 import Posts from "../home/Posts";
 import Loader from "../Loader";
 import { fetchUser } from "@/reducers/userSlice";
-import { fetchPosts } from "@/reducers/postSlice";
+import { fetchBookmarks, fetchPosts } from "@/reducers/postSlice";
 
 export default function BookmarksPage({ userData }) {
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.user.isLoading);
   const userInfo = useSelector((state) => state.user.userData);
   const posts = useSelector((state) => state.posts.posts);
+  const bookmarksPosts = useSelector((state) => state.posts.bookmarks);
   const filters = ["tweets", "tweets & replies", "media", "likes"];
 
   useEffect(() => {
     dispatch(fetchUser({ userId: userData.id }));
     dispatch(fetchPosts());
+    dispatch(fetchBookmarks(userData.id));
   }, [dispatch]);
 
   return (
@@ -30,7 +32,10 @@ export default function BookmarksPage({ userData }) {
             <Loader size="md" />
           </div>
         ) : (
-          <Posts posts={posts} userInfo={userInfo} />
+          <Posts posts={bookmarksPosts} userInfo={userInfo} />
+        )}
+        {bookmarksPosts.length === 0 && (
+          <p className="text-slate-500 mt-8 text-center">No Saved Posts</p>
         )}
       </div>
     </div>
