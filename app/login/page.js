@@ -9,8 +9,6 @@ export default async function Login({ searchParams }) {
   const supabase = createClient(cookieStore);
   const { data: session } = await supabase.auth.getSession();
 
-  console.log(session);
-
   if (session?.session) {
     redirect("/");
   }
@@ -33,9 +31,7 @@ export default async function Login({ searchParams }) {
     }
 
     const { data: user } = await supabase.auth.getUser();
-    console.log(user);
     const userData = await getUserFromDB(user);
-    console.log(userData);
 
     if (userData) {
       return redirect("/");

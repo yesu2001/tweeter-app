@@ -43,6 +43,16 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+export const signOutUser = createAsyncThunk("user/signOutUser", async () => {
+  try {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    console.log(error);
+  } catch (error) {
+    console.log("Could not sign out user", error);
+  }
+});
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -72,6 +82,17 @@ const userSlice = createSlice({
         // state.userData = action.payload;
       })
       .addCase(updateUser.rejected, (state) => {
+        state.isLoading = false;
+        state.error = "Something went wrong when updating the user profile";
+      })
+      .addCase(signOutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(signOutUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.userData = null;
+      })
+      .addCase(signOutUser.rejected, (state) => {
         state.isLoading = false;
         state.error = "Something went wrong when updating the user profile";
       });

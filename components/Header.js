@@ -10,11 +10,11 @@ import { FaUserEdit } from "react-icons/fa";
 import desktopLogo from "./assets/tweeter.svg";
 import mobileLogo from "./assets/tweeter-small.svg";
 import profilePic from "./assets/pic.avif";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import Loader from "./Loader";
 import defaultPic from "../components/assets/defaultPic.png";
-import { fetchUser } from "@/reducers/userSlice";
+import { fetchUser, signOutUser } from "@/reducers/userSlice";
 
 export default function Header() {
   const path = usePathname();
@@ -36,9 +36,7 @@ export default function Header() {
   }, [dispatch]);
 
   async function signout() {
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
-    console.log(error);
+    dispatch(signOutUser());
   }
 
   const isAuthenticated = false;
@@ -104,7 +102,7 @@ export default function Header() {
         {userData ? (
           <div className="flex items-center gap-2">
             <Image
-              src={defaultPic}
+              src={userData?.user_pic || defaultPic}
               alt="profile pic"
               width={40}
               height={40}
@@ -160,7 +158,7 @@ const DropDown = ({ onClose, signout }) => {
           Edit Profile
         </Link>
         <Link
-          href="login"
+          href="/login"
           onClick={() => {
             onClose();
             signout();

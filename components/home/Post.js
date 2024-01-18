@@ -41,6 +41,7 @@ export default function Post({ post, userInfo }) {
       const isLiked = await checkLikedByUser(post, userInfo);
       setLike(isLiked);
       const isSaved = await checkSavedByUser(post, userInfo);
+      console.log(isSaved);
       setSave(isSaved);
       const { data, error } = await fetchCommentsFromDB(post?.id);
       if (error) {

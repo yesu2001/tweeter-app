@@ -27,7 +27,10 @@ export async function createNewPost(post) {
 // fetch All posts
 export async function fetchPostFromDB() {
   try {
-    const { data, error } = await supabase.from("posts").select();
+    const { data, error } = await supabase
+      .from("posts")
+      .select()
+      .order("created_at", { ascending: false });
     if (error) {
       console.log(error);
       return {
@@ -386,6 +389,7 @@ export async function savePostToDB(saveRef, method) {
           error: error,
         };
       }
+      console.log(data);
       if (data) {
         await addOrDelSavedPost(data[0], method);
       }
@@ -454,20 +458,23 @@ export async function addOrDelSavedPost(saved, method) {
         .eq("id", saved?.post_id);
 
       const savedArray = data[0];
-
+      console.log(savedArray);
       const updatedSaves = savedArray?.saved_array
         ? [
-            ...savedArray.saved_array,
+            ...savedArray?.saved_array,
             { saved_id: saved?.saved_id, user_id: saved?.user_id },
           ]
         : [{ saved_id: saved?.saved_id, user_id: saved?.user_id }];
 
       if (data.length > 0) {
-        const { error: errorTwo } = await supabase
+        console.log(updatedSaves);
+        const { data, error: errorTwo } = await supabase
           .from("posts")
           .update({ saved_array: updatedSaves })
-          .eq("id", saved?.post_id);
+          .eq("id", saved?.post_id)
+          .select();
         if (errorTwo) console.log(errorTwo);
+        console.log("daaa after upadting:", data);
       }
     } catch (error) {
       console.log(error);

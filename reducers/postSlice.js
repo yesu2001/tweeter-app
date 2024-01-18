@@ -21,7 +21,7 @@ export const createPost = createAsyncThunk("post/createPost", async (post) => {
     }
     console.log(data);
     if (data.length > 0) {
-      return "Tweet Post Created Successfully";
+      return data[0];
     }
   } catch (error) {
     console.log("Error while creating new post", error);
@@ -173,7 +173,7 @@ const postSlice = createSlice({
       })
       .addCase(createPost.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.message = action.payload;
+        state.posts = [action.payload, ...state.posts];
       })
       .addCase(createPost.rejected, (state) => {
         state.isLoading = false;

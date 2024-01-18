@@ -9,8 +9,8 @@ import defaultPic from "../assets/defaultPic.png";
 import { createPost } from "@/reducers/postSlice";
 import { uploadImage } from "@/utils/clientHelpers";
 
-export default function CreatePost({ userInfo }) {
-  const dispatch = useDispatch();
+export default function CreatePost({ userInfo, dispatch }) {
+  // const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const fileRef = useRef(null);
   const [newPost, setNewPost] = useState({
@@ -52,9 +52,13 @@ export default function CreatePost({ userInfo }) {
       user_pic: userInfo.user_pic,
       user_name: userInfo.full_name,
       likes_count: 0,
+      likes_array: [],
       saved_count: 0,
+      saved_array: [],
       comments_count: 0,
+      comments_array: [],
       retweets_count: 0,
+      retweets_array: [],
     };
     dispatch(createPost(post));
     setNewPost({

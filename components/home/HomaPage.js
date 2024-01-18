@@ -18,6 +18,12 @@ export default function HomaPage({ userData }) {
   const posts = useSelector((state) => state.posts.posts);
 
   useEffect(() => {
+    if (!userInfo) {
+      redirect("/login");
+    }
+  }, []);
+
+  useEffect(() => {
     dispatch(fetchUser({ userId: userData?.id }));
     dispatch(fetchPosts());
   }, [dispatch]);
@@ -33,7 +39,7 @@ export default function HomaPage({ userData }) {
           {!userData && <Link href="/login">Go To Login</Link>}
           {userData && (
             <div className="flex-[0.7] space-y-6">
-              <CreatePost userInfo={userInfo} />
+              <CreatePost userInfo={userInfo} dispatch={dispatch} />
               <Posts posts={posts} userInfo={userInfo} />
             </div>
           )}

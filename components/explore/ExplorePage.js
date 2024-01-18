@@ -7,6 +7,7 @@ import { fetchUser } from "@/reducers/userSlice";
 import { fetchPosts } from "@/reducers/postSlice";
 import Filters from "./Filters";
 import Search from "./Search";
+import { redirect } from "next/navigation";
 
 export default function ExplorePage({ userData }) {
   const dispatch = useDispatch();
@@ -16,7 +17,13 @@ export default function ExplorePage({ userData }) {
   const filters = ["top", "latest", "people", "media"];
 
   useEffect(() => {
-    dispatch(fetchUser({ userId: userData.id }));
+    if (!userData) {
+      redirect("/login");
+    }
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchUser({ userId: userData?.id }));
     dispatch(fetchPosts());
   }, [dispatch]);
 

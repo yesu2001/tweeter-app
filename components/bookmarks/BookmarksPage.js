@@ -6,14 +6,20 @@ import Posts from "../home/Posts";
 import Loader from "../Loader";
 import { fetchUser } from "@/reducers/userSlice";
 import { fetchBookmarks, fetchPosts } from "@/reducers/postSlice";
+import { redirect } from "next/navigation";
 
 export default function BookmarksPage({ userData }) {
   const dispatch = useDispatch();
   const isLoading = useSelector((state) => state.user.isLoading);
   const userInfo = useSelector((state) => state.user.userData);
-  const posts = useSelector((state) => state.posts.posts);
   const bookmarksPosts = useSelector((state) => state.posts.bookmarks);
   const filters = ["tweets", "tweets & replies", "media", "likes"];
+
+  useEffect(() => {
+    if (!userData) {
+      redirect("/login");
+    }
+  }, []);
 
   useEffect(() => {
     dispatch(fetchUser({ userId: userData.id }));
